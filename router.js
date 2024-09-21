@@ -3,7 +3,7 @@ const router = express.Router();
 
 const User = require("./controllers/User_Controller");
 
-router.get("/user/findAll", (req, res) => new User(req.res).findAll());
+router.get("/user/findAll", (req, res) => new User(req, res).findAll());
 router.get("/user/findOne/:id", (req, res) =>
   new User(req, res).findOne(req.params.id)
 );

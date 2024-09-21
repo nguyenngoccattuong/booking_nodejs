@@ -1,8 +1,19 @@
 const pool = require("../database/connect");
 
 class User_Model {
-  findAll() {
-    return "findAll";
+  async findAll(phone, sort_name, sort_type, limit, skip) {
+    const sql =
+      `SELECT id, phone, created_at, updated_at FROM users WHERE phone like ? ORDER BY ` +
+      sort_name +
+      ` ` +
+      sort_type +
+      ` LIMIT ` +
+      skip +
+      `,` +
+      limit;
+
+    const [data] = await pool.query(sql, ["%" + phone + "%"]);
+    return data;
   }
 
   async findOne(id) {
@@ -33,8 +44,14 @@ class User_Model {
     return data[0];
   }
 
-  delete(id) {
-    return "findAll";
+  async delete(id) {
+    const sql = "DELETE FROM users WHERE id = ?";
+    await pool.query(sql, [id]);
+
+    // const selectSql = "SELECT * FROM users WHERE id = ?";
+    // const [data] = await pool.query(selectSql, [id]);
+
+    return "Deleted!";
   }
 
   async check_phone(phone) {
