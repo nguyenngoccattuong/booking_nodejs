@@ -1,18 +1,18 @@
 const Controller = require("./Controller");
-const User_Model = require("../models/User_Model");
+const UserModel = require("../models/UserModel");
 
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 
-class User_Controller extends Controller {
+class UserController extends Controller {
   constructor(req, res) {
     super(req, res);
   }
 
   async findAll() {
-    return this.response(200, this.req.params);
+    // return this.response(200, this.req.params);
     try {
-      const user_model = new User_Model();
+      const userModel = new UserModel();
 
       const phone = this.req.query.phone;
 
@@ -26,7 +26,7 @@ class User_Controller extends Controller {
 
       const skip = (page - 1) * limit;
 
-      const data = await user_model.findAll(
+      const data = await userModel.findAll(
         phone,
         sort_name,
         sort_type,
@@ -42,8 +42,8 @@ class User_Controller extends Controller {
 
   async findOne(id) {
     try {
-      const user_model = new User_Model();
-      const data = await user_model.findOne(id);
+      const userModel = new UserModel();
+      const data = await userModel.findOne(id);
 
       return this.response(200, data);
     } catch (error) {
@@ -134,4 +134,4 @@ class User_Controller extends Controller {
   }
 }
 
-module.exports = User_Controller;
+module.exports = UserController;

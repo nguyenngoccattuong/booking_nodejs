@@ -54,10 +54,18 @@ class User_Model {
     return "Deleted!";
   }
 
+  login(phone, password) {}
+
   async check_phone(phone) {
     const sql = "SELECT id FROM users WHERE phone = ?";
     const [data] = await pool.query(sql, [phone]);
     return data[0] ? true : false;
+  }
+
+  async getPhone(phone) {
+    const sql = "SELECT phone, password FROM users WHERE phone = ?";
+    const data = await pool.query(sql, [phone]);
+    return data[0];
   }
 }
 

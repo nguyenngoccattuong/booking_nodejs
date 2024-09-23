@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const User = require("./controllers/User_Controller");
+const Auth = require("./controllers/AuthController");
+const User = require("./controllers/UserController");
+
+router.post("/auth/login", (req, res) => new Auth(req, res).login());
 
 router.get("/user/findAll", (req, res) => new User(req, res).findAll());
 router.get("/user/findOne/:id", (req, res) =>

@@ -7,24 +7,30 @@ class Controller {
     this.res = res;
   }
 
-  success(data = []) {
+  success(statusCode = 200, data = []) {
     return {
+      statusCode: statusCode,
       success: true,
       message: "Success",
       data: data,
     };
   }
 
-  error(error = []) {
+  error(statusCode = 422, error = []) {
     return {
+      statusCode: statusCode,
       success: true,
       message: "Error",
       error: error,
     };
   }
 
-  response(status, data = []) {
-    return this.res.send(status == 200 ? this.success(data) : this.error(data));
+  response(statusCode, data = []) {
+    return this.res.send(
+      statusCode == 200
+        ? this.success(statusCode, data)
+        : this.error(statusCode, data)
+    );
   }
 }
 
