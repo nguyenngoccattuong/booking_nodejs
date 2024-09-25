@@ -31,7 +31,7 @@ class AuthController extends Controller {
     const result = bcrypt.compareSync(password, oldPassword);
 
     if (!result) {
-      return this.response(422, "Sai mật khẩu!");
+      return this.response(422, "Tài khoản không tồn tại!");
     }
 
     return this.response(200, result);
