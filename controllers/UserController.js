@@ -53,10 +53,9 @@ class UserController extends Controller {
 
   async create() {
     try {
-      const user_model = new User_Model();
+      const created_by = this.auth_user_id();
 
-      const phone = this.req.body.phone;
-      let password = this.req.body.password;
+      let { phone, password } = this.req.body;
 
       if (!phone) {
         return this.response(400, "Số điện thoại không được rỗng");
@@ -74,14 +73,14 @@ class UserController extends Controller {
         return this.response(400, "Mật khẩu không được lớn hơn 100");
       }
 
+      const user_model = new UserModel();
+
       const check_phone = await user_model.check_phone(phone);
       if (check_phone) {
         return this.response(400, "Số điện thoại đã tồn tại!");
       }
 
-      password = bcrypt.hashSync(password, salt);
-
-      const data = await user_model.create(phone, password);
+      const data = await user_model.create(this.req.body, created_by);
 
       return this.response(200, data);
     } catch (error) {
