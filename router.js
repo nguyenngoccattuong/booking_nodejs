@@ -6,8 +6,11 @@ const User = require("./controllers/UserController");
 
 router.post("/auth/login", (req, res) => new Auth(req, res).login());
 
+router.post("/auth/logout", (req, res) => new Auth(req, res).logout());
+
 router.get(
   "/user/findAll",
+  (req, res, next) => new Auth(req, res, next).checkToken(),
   (req, res, next) => new Auth(req, res, next).authorization(),
   (req, res) => new User(req, res).findAll()
 );

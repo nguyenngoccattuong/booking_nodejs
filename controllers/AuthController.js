@@ -1,12 +1,12 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const secret = process.env.SECRET;
-// const secret = process.env.JWT_SECRET;
+const secret = process.env.SECRET; // Đảm bảo rằng SECRET được cấu hình trong .env
 
 require("dotenv").config();
 
 const Controller = require("./Controller");
 const UserModel = require("../models/UserModel");
+const TokenModel = require("../models/TokenModel");
 
 class AuthController extends Controller {
   constructor(req, res, next) {
@@ -26,7 +26,6 @@ class AuthController extends Controller {
       }
 
       const userModel = new UserModel();
-
       const getPhone = await userModel.getPhone(phone);
 
       if (getPhone && getPhone.length == 0) {
@@ -41,7 +40,6 @@ class AuthController extends Controller {
       }
 
       const data = await userModel.findOne(getPhone[0].id);
-
       const token = jwt.sign(
         {
           exp: Math.floor(Date.now() / 1000) + 60 * 60,
@@ -50,12 +48,33 @@ class AuthController extends Controller {
         secret
       );
 
-      console.log("data:", data);
-      console.log("JWT_SECRET:", secret); // Kiểm tra giá trị của secret
+      // Lưu token vào cơ sở dữ liệu với trạng thái 1 (active)
+      const tokenModel = new TokenModel();
+      await tokenModel.run(token, data[0].id);
 
       return this.response(200, { token });
     } catch (error) {
       return this.response(500, error);
+    }
+  }
+
+  async logout() {
+    try {
+      const auth = this.req.header("authorization");
+      if (!auth) {
+        return this.response(401, "Vui lòng nhập Token");
+      }
+
+      const token = auth.split(" ")[1]; // Lấy token từ header
+      const decoded = jwt.verify(token, secret);
+      const userId = decoded.data.id;
+
+      const tokenModel = new TokenModel();
+      await tokenModel.updateStatus(token, 0);
+
+      return this.response(200, "Đăng xuất thành công");
+    } catch (err) {
+      return this.response(401, "Token không hợp lệ hoặc đã hết hạn");
     }
   }
 
@@ -70,10 +89,37 @@ class AuthController extends Controller {
     const token = split_auth[1];
 
     try {
-      jwt.verify(token, process.env.SECRET);
+      jwt.verify(token, secret);
       return this.next();
     } catch (err) {
-      return this.response(401, "Token hết hạn");
+      return this.response(401, "Token không hợp lệ hoặc đã hết hạn");
+    }
+  }
+
+  // Hàm kiểm tra token
+  async checkToken() {
+    try {
+      const auth = this.req.header("authorization");
+      if (!auth) {
+        return this.response(401, "Vui lòng nhập Token");
+      }
+
+      const token = auth.split(" ")[1]; // Lấy token từ header
+      const decoded = jwt.verify(token, secret); // Giải mã token
+      const userId = decoded.data.id; // Lấy user ID từ token
+
+      const tokenModel = new TokenModel();
+
+      // Kiểm tra token trong cơ sở dữ liệu
+      const tokenStatus = await tokenModel.findStatus(1, userId); // Tìm token có status = 1 và created_by = userId
+
+      // Nếu không tìm thấy token hoặc không tồn tại, trả về lỗi
+      if (!tokenStatus || tokenStatus.length === 0) {
+        return this.response(403, "Token không hợp lệ hoặc đã hết hạn.");
+      }
+      return this.next();
+    } catch (error) {
+      return this.response(401, "Token không hợp lệ hoặc đã hết hạn.");
     }
   }
 }

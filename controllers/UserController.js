@@ -1,5 +1,6 @@
 const Controller = require("./Controller");
 const UserModel = require("../models/UserModel");
+const TokenModel = require("../models/TokenModel");
 
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
@@ -10,10 +11,8 @@ class UserController extends Controller {
   }
 
   async findAll() {
-    // return this.response(200, this.req.params);
     try {
       const userModel = new UserModel();
-
       const phone = this.req.query.phone;
 
       const sort_name =
@@ -90,7 +89,7 @@ class UserController extends Controller {
 
   async update(id) {
     try {
-      const user_model = new User_Model();
+      const user_model = new UserModel();
 
       let password = this.req.body.password;
 
