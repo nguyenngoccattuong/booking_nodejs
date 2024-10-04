@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const secret = process.env.SECRET; // Đảm bảo rằng SECRET được cấu hình trong .env
+const secret = process.env.SECRET;
 
 require("dotenv").config();
 
@@ -48,7 +48,6 @@ class AuthController extends Controller {
         secret
       );
 
-      // Lưu token vào cơ sở dữ liệu với trạng thái 1 (active)
       const tokenModel = new TokenModel();
       await tokenModel.run(token, data[0].id);
 
@@ -96,7 +95,6 @@ class AuthController extends Controller {
     }
   }
 
-  // Hàm kiểm tra token
   async checkToken() {
     try {
       const auth = this.req.header("authorization");
@@ -104,16 +102,14 @@ class AuthController extends Controller {
         return this.response(401, "Vui lòng nhập Token");
       }
 
-      const token = auth.split(" ")[1]; // Lấy token từ header
-      const decoded = jwt.verify(token, secret); // Giải mã token
-      const userId = decoded.data.id; // Lấy user ID từ token
+      const token = auth.split(" ")[1];
+      const decoded = jwt.verify(token, secret);
+      const userId = decoded.data.id;
 
       const tokenModel = new TokenModel();
 
-      // Kiểm tra token trong cơ sở dữ liệu
-      const tokenStatus = await tokenModel.findStatus(1, userId); // Tìm token có status = 1 và created_by = userId
+      const tokenStatus = await tokenModel.findStatus(1, userId);
 
-      // Nếu không tìm thấy token hoặc không tồn tại, trả về lỗi
       if (!tokenStatus || tokenStatus.length === 0) {
         return this.response(403, "Token không hợp lệ hoặc đã hết hạn.");
       }
